@@ -7,24 +7,19 @@ document.addEventListener("DOMContentLoaded", function() {
 
     uploadForm.addEventListener('submit', function(event) {
         event.preventDefault();
-        
-        const formData = new FormData();
-        formData.append('photo', photoInput.files[0]);
-        formData.append('description', photoDescription.value);
+        const file = photoInput.files[0];
+        const description = photoDescription.value;
 
-        fetch('http://localhost:3000/upload', {
-            method: 'POST',
-            body: formData
-        })
-        .then(response => response.json())
-        .then(data => {
-            addPhotoToGallery(data.filename, data.description);
-            photoInput.value = '';
-            photoDescription.value = '';
-        })
-        .catch(error => {
-            console.error('Error:', error);
-        });
+        if (file && description) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const photoUrl = e.target.result;
+                addPhotoToGallery(photoUrl, description);
+                photoInput.value = '';
+                photoDescription.value = '';
+            }
+            reader.readAsDataURL(file);
+        }
     });
 
     searchInput.addEventListener('input', function() {
@@ -41,12 +36,12 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     });
 
-    function addPhotoToGallery(filename, description) {
+    function addPhotoToGallery(photoUrl, description) {
         const photoItem = document.createElement('div');
         photoItem.className = 'photo-item';
 
         const img = document.createElement('img');
-        img.src = `http://localhost:3000/${filename}`;
+        img.src = photoUrl;
         photoItem.appendChild(img);
 
         const desc = document.createElement('p');
@@ -57,10 +52,7 @@ document.addEventListener("DOMContentLoaded", function() {
         deleteButton.className = 'delete-button';
         deleteButton.textContent = 'Delete';
         deleteButton.addEventListener('click', function() {
-            photoItem.style.animation = 'fadeOut 0.5s ease-in-out';
-            photoItem.addEventListener('animationend', function() {
-                gallery.removeChild(photoItem);
-            });
+            gallery.removeChild(photoItem);
         });
         photoItem.appendChild(deleteButton);
 
