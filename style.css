@@ -1,131 +1,61 @@
-@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap');
+document.addEventListener("DOMContentLoaded", function() {
+    const uploadForm = document.getElementById('upload-form');
+    const photoInput = document.getElementById('photo-input');
+    const photoDescription = document.getElementById('photo-description');
+    const gallery = document.getElementById('gallery');
+    const searchInput = document.getElementById('search-input');
 
-body {
-    font-family: 'Roboto', sans-serif;
-    margin: 0;
-    padding: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    background-color: #f9f9f9;
-    color: #333;
-}
+    uploadForm.addEventListener('submit', function(event) {
+        event.preventDefault();
+        const file = photoInput.files[0];
+        const description = photoDescription.value;
 
-header {
-    background-color: #4CAF50;
-    color: white;
-    width: 100%;
-    text-align: center;
-    padding: 1em 0;
-}
+        if (file && description) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const photoUrl = e.target.result;
+                addPhotoToGallery(photoUrl, description);
+                photoInput.value = '';
+                photoDescription.value = '';
+            }
+            reader.readAsDataURL(file);
+        }
+    });
 
-#logo {
-    width: 200px; /* Ajuste o tamanho conforme necessário */
-    margin-bottom: 10px;
-    animation: fadeIn 2s ease-in-out;
-}
+    searchInput.addEventListener('input', function() {
+        const query = searchInput.value.toLowerCase();
+        const photos = document.querySelectorAll('.photo-item');
 
-main {
-    width: 80%;
-    max-width: 800px;
-    margin: 20px auto;
-    background-color: #fff;
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-}
+        photos.forEach(photo => {
+            const description = photo.querySelector('p').textContent.toLowerCase();
+            if (description.includes(query)) {
+                photo.style.display = '';
+            } else {
+                photo.style.display = 'none';
+            }
+        });
+    });
 
-section {
-    margin-bottom: 20px;
-}
+    function addPhotoToGallery(photoUrl, description) {
+        const photoItem = document.createElement('div');
+        photoItem.className = 'photo-item';
 
-h2 {
-    color: #4CAF50;
-}
+        const img = document.createElement('img');
+        img.src = photoUrl;
+        photoItem.appendChild(img);
 
-input[type="file"], input[type="text"], button {
-    width: 100%;
-    padding: 10px;
-    margin: 10px 0;
-    border-radius: 5px;
-    border: 1px solid #ccc;
-}
+        const desc = document.createElement('p');
+        desc.textContent = description;
+        photoItem.appendChild(desc);
 
-button {
-    background-color: #4CAF50;
-    color: white;
-    border: none;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-}
+        const deleteButton = document.createElement('button');
+        deleteButton.className = 'delete-button';
+        deleteButton.textContent = 'Delete';
+        deleteButton.addEventListener('click', function() {
+            gallery.removeChild(photoItem);
+        });
+        photoItem.appendChild(deleteButton);
 
-button:hover {
-    background-color: #45a049;
-}
-
-#gallery {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-}
-
-.photo-item {
-    border: 1px solid #ddd;
-    padding: 10px;
-    width: 200px;
-    position: relative;
-    background-color: #fff;
-    border-radius: 10px;
-    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
-    animation: fadeIn 0.5s ease-in-out;
-}
-
-.photo-item img {
-    width: 100%;
-    height: auto;
-    border-radius: 10px;
-}
-
-.photo-item p {
-    margin: 10px 0 0;
-    text-align: center;
-}
-
-.delete-button {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    background-color: red;
-    color: white;
-    border: none;
-    padding: 5px 10px;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-}
-
-.delete-button:hover {
-    background-color: darkred;
-}
-
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: scale(0.9);
+        gallery.appendChild(photoItem);
     }
-    to {
-        opacity: 1;
-        transform: scale(1);
-    }
-}
-
-@keyframes fadeOut {
-    from {
-        opacity: 1;
-        transform: scale(1);
-    }
-    to {
-        opacity: 0;
-        transform: scale(0.9);
-    }
-}
+});
